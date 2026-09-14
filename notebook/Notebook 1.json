@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "00312fe7-50e0-4b29-a611-9ea856767c8b"
+				"spark.autotune.trackingId": "bc334494-b6ce-46e7-a87a-65f9337f1efc"
 			}
 		},
 		"metadata": {
@@ -50,37 +50,84 @@
 		"cells": [
 			{
 				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
 				"source": [
-					" from pyspark.sql.functions import *\n",
-					" from pyspark.sql.types import *\n",
+					"# from pyspark.sql.functions import *\n",
+					"# from pyspark.sql.types import *\n",
 					"\n",
-					"customers_df = spark.read.format(\"csv\") \\\n",
-					"    .options(\"header\",\"true\") \\\n",
-					"    .options(\"inferSchema\",\"true\") \\\n",
-					"    .load(\"abfss://retail-data@ecomedevstorage.dfs.core.windows.net/customers/*\")\n",
+					"# source_container = \"retail-data\"\n",
+					"# entities = [\"customers\",\"sales\",\"sales_orders\"]\n",
+					"# target_conatiner = [\"bronze\"]\n",
 					"\n",
-					"display(customers_df)"
+					"\n",
+					"# for entity in entities:\n",
+					"#     print(f\"Processing: {entity}...\")\n",
+					"\n",
+					"\n",
+					"\n",
+					"# df = spark.read.format(\"csv\") \\\n",
+					"#     .option(\"header\",\"true\") \\\n",
+					"#     .option(\"inferSchema\",\"true\") \\\n",
+					"#     .load(f\"abfss://{source_container}@ecomdevstorage.dfs.core.windows.net/{entity}/*\")\n",
+					"\n",
+					"\n",
+					"# bronze_df = df \\\n",
+					"#     .withColumn(\"file_path\",input_file_name()) \\\n",
+					"#     .withColumn(\"last_uodated_ts\",current_timestamp()) \n",
+					"# display(bronze_df)\n",
+					"\n",
+					"\n",
+					"# bronze_df.write.format(\"delta\") \\\n",
+					"#     .mode(\"overwrite\") \\ \n",
+					"#     .save(f\"abfss://bronze@ecomedevstorage.dfs.core.windows.net/{entity}/*\")\n",
+					"\n",
+					"# display(customers_df)"
 				],
-				"execution_count": null
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
 				"source": [
+					"from pyspark.sql.functions import *\n",
+					"from pyspark.sql.types import *\n",
 					"\n",
-					"bronze_df = customers_df \\\n",
-					"    .withColumn(\"file_path\",input_file_name()) \\\n",
-					"    .withColumn(\"last_uodated_ts\",current_timestamp()) \n",
-					"display(bronze_df)\n",
+					"source_container = \"retail-data\"\n",
+					"entities = [\"customers\", \"sales\", \"sales_orders\"]\n",
+					"target_container = \"bronze\"\n",
+					"\n",
+					"for entity in entities:\n",
+					"\n",
+					"    print(f\"Data processing started for entity: {entity}\")\n",
+					"\n",
+					"    df = spark.read.format(\"csv\") \\\n",
+					"        .option(\"header\", \"true\") \\\n",
+					"        .option(\"inferSchema\", \"true\") \\\n",
+					"        .load(f\"abfss://{source_container}@ecomedevstorage.dfs.core.windows.net/{entity}/*\")\n",
+					"\n",
+					"    print(f\"Read completed for {entity} in {source_container} container.\")\n",
+					"\n",
+					"    bronze_df = df \\\n",
+					"        .withColumn(\"file_path\", input_file_name()) \\\n",
+					"        .withColumn(\"last_updated_ts\", current_timestamp())\n",
+					"\n",
+					"    print(f\"Metadata columns added successfully. Now writing {entity}.\")\n",
+					"\n",
+					"    bronze_df.write \\\n",
+					"        .format(\"delta\")\\\n",
+					"        .option(\"overwriteSchema\", \"true\")\\\n",
+					"        .mode(\"overwrite\")\\\n",
+					"        .save(f\"abfss://{target_container}@ecomedevstorage.dfs.core.windows.net/{entity}/\")\n",
+					"\n",
+					"    print(f\"Write completed for {entity} in {target_container} container.\")"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"source": [
 					""
-				],
-				"execution_count": null
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"bronze_df.write.format(\"delta\") \\\n",
-					"    .mode(\"overwrite\") \\ \n",
-					"    .save(\"abfss://bronze@ecomedevstorage.dfs.core.windows.net/customers/*\")"
 				],
 				"execution_count": null
 			}
