@@ -1,0 +1,166 @@
+{
+	"name": "transformation_notebook",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "13104626-f638-453a-8d55-cccb02a687f0"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/252558c6-6a92-406f-8c85-7c8ef7350693/resourceGroups/e-commerce_analytics/providers/Microsoft.Synapse/workspaces/ecom-synapse/bigDataPools/sparkpool",
+				"name": "sparkpool",
+				"type": "Spark",
+				"endpoint": "https://ecom-synapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.5",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql.functions import *\n",
+					"from pyspark.sql.types import *\n",
+					"\n",
+					"storage_account = \"ecomedevstorage\"\n",
+					"container_name = \"staging\"\n",
+					"file_path = \"data_e9d6c2bf-02cf-4973-9d24-95fd63c1912b_08e8cd4f-f615-4e68-bbbd-396d9340d67b.txt\"\n",
+					""
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"from pyspark.sql.functions import col, trim, initcap, lower, when, to_date\n",
+					"adls_path = f\"abfss://{container_name}@{storage_account}.dfs.core.windows.net/{file_path}\"\n",
+					"\n",
+					"# Reading the dataset\n",
+					"df = spark.read.load(\n",
+					"    adls_path,\n",
+					"    format=\"csv\",\n",
+					"    header=True,\n",
+					"    inferSchema=True\n",
+					")\n",
+					"df = df.dropDuplicates()\n",
+					"\n",
+					"cleaned_df = (\n",
+					"    df\n",
+					"    .withColumn(\"customer_id\", trim(col(\"customer_id\")))\n",
+					"    .withColumn(\"first_name\", initcap(trim(col(\"first_name\"))))\n",
+					"    .withColumn(\"last_name\", initcap(trim(col(\"last_name\"))))\n",
+					"    .withColumn(\"email\", lower(trim(col(\"email\"))))\n",
+					"    .withColumn(\"city\", initcap(trim(col(\"city\"))))\n",
+					"    .withColumn(\"customer_segment\", initcap(trim(col(\"customer_segment\"))))\n",
+					")\n",
+					"\n",
+					"# df_final = cleaned_df \\\n",
+					"#     .filter(col(\"customer_id\").isNotNull() & (col(\"customer_id\") != \"\")) \\\n",
+					"#     .withColumn(\"age\", when((col(\"age\") >= 18) & (col(\"age\") <= 100), col(\"age\")).otherwise(None)) \\\n",
+					"#     .withColumn(\"income\", when(col(\"income\") >= 0, col(\"income\")).otherwise(None)) \\\n",
+					"#     .withColumn(\"spending_score\", when((col(\"spending_score\") >= 0) & (col(\"spending_score\") <= 100), col(\"spending_score\")).otherwise(None))\n",
+					"\n",
+					"\n",
+					"display(cleaned_df.limit(10))\n",
+					""
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql.functions import col, trim, lower, to_timestamp, when\n",
+					"\n",
+					"cleaned_df = (\n",
+					"    cleaned_df\n",
+					"    .withColumn(\"age\", col(\"age\").cast(\"int\"))\n",
+					"    .withColumn(\"signup_date\", to_timestamp(col(\"signup_date\")))\n",
+					"    .withColumn(\"annual_income\", col(\"annual_income\").cast(\"decimal(18,2)\"))\n",
+					"    .withColumn(\"total_spend\", col(\"total_spend\").cast(\"decimal(18,2)\"))\n",
+					"    .withColumn(\"total_orders\", col(\"total_orders\").cast(\"int\"))\n",
+					"    .withColumn(\n",
+					"        \"is_active\",\n",
+					"        when(lower(trim(col(\"is_active\"))) == \"true\", True)\n",
+					"        .when(lower(trim(col(\"is_active\"))) == \"false\", False)\n",
+					"        .otherwise(None)\n",
+					"    )\n",
+					")"
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from com.microsoft.spark.sqlanalytics.Constants import Constants\n",
+					"\n",
+					"sql_server = \"ecom-synapse.sql.azuresynapse.net\"\n",
+					"\n",
+					"temp_folder = (\n",
+					"    f\"abfss://{container_name}@{storage_account}.dfs.core.windows.net/\"\n",
+					"    \"staging/sql_temp\"\n",
+					")\n",
+					"\n",
+					"(\n",
+					"    cleaned_df.write\n",
+					"    .option(Constants.SERVER, sql_server)\n",
+					"    .option(Constants.TEMP_FOLDER, temp_folder)\n",
+					"    .mode(\"overwrite\")\n",
+					"    .synapsesql(\"sqlpool.dbo.stg_customer_cleaned\")\n",
+					")\n",
+					"\n",
+					"print(\"Data successfully written to Dedicated SQL Pool!\")"
+				],
+				"execution_count": 14
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"cleaned_df.printSchema()"
+				],
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
