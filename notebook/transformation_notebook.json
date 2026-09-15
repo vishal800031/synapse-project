@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "13104626-f638-453a-8d55-cccb02a687f0"
+				"spark.autotune.trackingId": "55be295d-7862-4e63-8e13-0fe27a7387f4"
 			}
 		},
 		"metadata": {
@@ -50,6 +50,11 @@
 		"cells": [
 			{
 				"cell_type": "code",
+				"metadata": {
+					"tags": [
+						"parameters"
+					]
+				},
 				"source": [
 					"from pyspark.sql.functions import *\n",
 					"from pyspark.sql.types import *\n",
@@ -99,7 +104,7 @@
 					"display(cleaned_df.limit(10))\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -121,7 +126,7 @@
 					"    )\n",
 					")"
 				],
-				"execution_count": 13
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -145,14 +150,14 @@
 					"\n",
 					"print(\"Data successfully written to Dedicated SQL Pool!\")"
 				],
-				"execution_count": 14
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
 				"source": [
 					"cleaned_df.printSchema()"
 				],
-				"execution_count": 15
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
