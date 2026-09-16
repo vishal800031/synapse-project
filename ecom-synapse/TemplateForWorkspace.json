@@ -303,7 +303,10 @@
 						},
 						"linkedServiceName": {
 							"referenceName": "ecom-synapse-WorkspaceDefaultSqlServer",
-							"type": "LinkedServiceReference"
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"DBName": "sqlpool"
+							}
 						}
 					}
 				],
@@ -594,7 +597,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "3c2b0642-37f5-4c49-b0df-4097d0356440"
+						"spark.autotune.trackingId": "8f2b0571-3a4e-48c1-b8ab-9f1fb693b808"
 					}
 				},
 				"metadata": {
@@ -619,7 +622,8 @@
 						"sparkVersion": "3.5",
 						"nodeCount": 3,
 						"cores": 4,
-						"memory": 28
+						"memory": 28,
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -673,6 +677,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"from pyspark.sql.functions import col, trim, lower, to_timestamp, when\n",
 							"\n",
@@ -696,6 +701,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"from com.microsoft.spark.sqlanalytics.Constants import Constants\n",
 							"\n",
@@ -723,6 +729,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"    "
 						],
@@ -731,6 +738,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							""
 						],
