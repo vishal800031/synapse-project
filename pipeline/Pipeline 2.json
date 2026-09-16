@@ -269,7 +269,10 @@
 				},
 				"linkedServiceName": {
 					"referenceName": "ecom-synapse-WorkspaceDefaultSqlServer",
-					"type": "LinkedServiceReference"
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DBName": "sqlpool"
+					}
 				}
 			}
 		],
