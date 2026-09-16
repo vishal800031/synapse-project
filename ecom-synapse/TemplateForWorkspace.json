@@ -278,6 +278,33 @@
 							"driverSize": "Small",
 							"numExecutors": 1
 						}
+					},
+					{
+						"name": "Load Customer Final",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Notebook1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "dbo.usp_load_customer_final"
+						},
+						"linkedServiceName": {
+							"referenceName": "ecom-synapse-WorkspaceDefaultSqlServer",
+							"type": "LinkedServiceReference"
+						}
 					}
 				],
 				"policy": {
@@ -289,7 +316,8 @@
 				"[concat(variables('workspaceId'), '/datasets/ds_adls_json_raw')]",
 				"[concat(variables('workspaceId'), '/datasets/DelimitedText1')]",
 				"[concat(variables('workspaceId'), '/notebooks/transformation_notebook')]",
-				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]"
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]",
+				"[concat(variables('workspaceId'), '/linkedServices/ecom-synapse-WorkspaceDefaultSqlServer')]"
 			]
 		},
 		{
@@ -526,6 +554,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE TABLE dbo.customer_final\n(\n    customer_id       VARCHAR(50),\n    first_name        VARCHAR(100),\n    last_name         VARCHAR(100),\n    email             VARCHAR(255),\n    phone             VARCHAR(50),\n    age               INT,\n    gender            VARCHAR(20),\n    city              VARCHAR(100),\n    state             VARCHAR(100),\n    country           VARCHAR(100),\n    signup_date       DATETIME2,\n    customer_segment  VARCHAR(50),\n    annual_income     DECIMAL(18,2),\n    total_spend       DECIMAL(18,2),\n    total_orders      INT,\n    is_active         BIT\n)\nWITH\n(\n    DISTRIBUTION = ROUND_ROBIN,\n    HEAP\n);\n\n\n\n\n\n\n\nCREATE PROCEDURE dbo.usp_load_customer_final\nAS\nBEGIN\n\n    -- Remove previous data\n    TRUNCATE TABLE dbo.customer_final;\n\n    -- Load data from staging into final table\n    INSERT INTO dbo.customer_final\n    (\n        customer_id,\n        first_name,\n        last_name,\n        email,\n        phone,\n        age,\n        gender,\n        city,\n        state,\n        country,\n        signup_date,\n        customer_segment,\n        annual_income,\n        total_spend,\n        total_orders,\n        is_active\n    )\n    SELECT\n        customer_id,\n        first_name,\n        last_name,\n        email,\n        phone,\n        age,\n        gender,\n        city,\n        state,\n        country,\n        signup_date,\n        customer_segment,\n        annual_income,\n        total_spend,\n        total_orders,\n        is_active\n    FROM dbo.stg_customer_cleaned;\n\n\nEND;\n\n\n\n\n\nEXEC dbo.usp_load_customer_final;\n\nSELECT COUNT(*) AS total_records\nFROM dbo.customer_final;\n\n\nSELECT TOP 10 *\nFROM dbo.customer_final;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqlpool",
+						"poolName": "sqlpool"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/transformation_notebook')]",
 			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
@@ -546,7 +594,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "d9410fdb-de9f-4b1d-b817-f3ec19d395bd"
+						"spark.autotune.trackingId": "3c2b0642-37f5-4c49-b0df-4097d0356440"
 					}
 				},
 				"metadata": {
@@ -571,8 +619,7 @@
 						"sparkVersion": "3.5",
 						"nodeCount": 3,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -591,7 +638,7 @@
 							"file_path = \"customers_final.csv\""
 						],
 						"outputs": [],
-						"execution_count": 10
+						"execution_count": 24
 					},
 					{
 						"cell_type": "code",
@@ -622,11 +669,10 @@
 							")"
 						],
 						"outputs": [],
-						"execution_count": 11
+						"execution_count": 25
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"from pyspark.sql.functions import col, trim, lower, to_timestamp, when\n",
 							"\n",
@@ -646,11 +692,10 @@
 							")"
 						],
 						"outputs": [],
-						"execution_count": 12
+						"execution_count": 26
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"from com.microsoft.spark.sqlanalytics.Constants import Constants\n",
 							"\n",
@@ -671,15 +716,13 @@
 							"\n",
 							"print(\"Data successfully written to Dedicated SQL Pool!\")\n",
 							"\n",
-							"\n",
-							"mssparkutils.notebook.exit(\"SUCCESS\")"
+							"mssparkutils.session.stop()"
 						],
 						"outputs": [],
-						"execution_count": 15
+						"execution_count": 27
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"    "
 						],
@@ -688,7 +731,6 @@
 					},
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							""
 						],
