@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "a20ef939-f71d-4d34-a042-54ac3458ae90"
+				"spark.autotune.trackingId": "859d5bd2-6909-429e-a872-6e047df47b20"
 			}
 		},
 		"metadata": {
@@ -124,7 +124,7 @@
 					"\n",
 					"temp_folder = (\n",
 					"    f\"abfss://{container_name}@{storage_account}.dfs.core.windows.net/\"\n",
-					"    \"staging/sql_temp\"\n",
+					"    \"sql_temp\"\n",
 					")\n",
 					"\n",
 					"(\n",
