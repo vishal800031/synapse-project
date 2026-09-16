@@ -252,9 +252,9 @@
 							}
 						],
 						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
+							"timeout": "0.00:30:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 58,
 							"secureOutput": false,
 							"secureInput": false
 						},
@@ -269,12 +269,14 @@
 								"referenceName": "sparkpool",
 								"type": "BigDataPoolReference"
 							},
+							"executorSize": "Small",
 							"conf": {
-								"spark.dynamicAllocation.enabled": null,
-								"spark.dynamicAllocation.minExecutors": null,
-								"spark.dynamicAllocation.maxExecutors": null
+								"spark.dynamicAllocation.enabled": false,
+								"spark.dynamicAllocation.minExecutors": 1,
+								"spark.dynamicAllocation.maxExecutors": 1
 							},
-							"numExecutors": null
+							"driverSize": "Small",
+							"numExecutors": 1
 						}
 					}
 				],
@@ -509,7 +511,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "CREATE TABLE dbo.stg_customer_cleaned\n(\n    customer_id VARCHAR(50),\n    first_name VARCHAR(100),\n    last_name VARCHAR(100),\n    email VARCHAR(255),\n    phone VARCHAR(30),\n    age INT,\n    gender VARCHAR(20),\n    city VARCHAR(100),\n    state VARCHAR(100),\n    country VARCHAR(100),\n    signup_date DATE,\n    customer_segment VARCHAR(50),\n    annual_income DECIMAL(18,2),\n    total_spend DECIMAL(18,2),\n    total_orders INT,\n    is_active BIT\n);\n\n\n\n\nSELECT TOP 10 *\nFROM dbo.stg_customer_cleaned;\n\n\n\nSELECT\n    customer_id,\n    first_name,\n    last_name,\n    email,\n    age,\n    annual_income,\n    total_spend,\n    total_orders,\n    is_active\nFROM dbo.stg_customer_cleaned\nWHERE age IS NULL\n   OR annual_income IS NULL\n   OR total_spend IS NULL\n   OR total_orders IS NULL\n   OR is_active IS NULL;",
+					"query": "CREATE TABLE dbo.stg_customer_cleaned\n(\n    customer_id VARCHAR(50),\n    first_name VARCHAR(100),\n    last_name VARCHAR(100),\n    email VARCHAR(255),\n    phone VARCHAR(30),\n    age INT,\n    gender VARCHAR(20),\n    city VARCHAR(100),\n    state VARCHAR(100),\n    country VARCHAR(100),\n    signup_date DATE,\n    customer_segment VARCHAR(50),\n    annual_income DECIMAL(18,2),\n    total_spend DECIMAL(18,2),\n    total_orders INT,\n    is_active BIT\n);\n\n\n\n\nSELECT COUNT(*) as total_rows\nFROM dbo.stg_customer_cleaned;\n\n\n\nSELECT\n    customer_id,\n    first_name,\n    last_name,\n    email,\n    age,\n    annual_income,\n    total_spend,\n    total_orders,\n    is_active\nFROM dbo.stg_customer_cleaned\nWHERE age IS NULL\n   OR annual_income IS NULL\n   OR total_spend IS NULL\n   OR total_orders IS NULL\n   OR is_active IS NULL;",
 					"metadata": {
 						"language": "sql"
 					},
@@ -520,147 +522,6 @@
 					"resultLimit": 5000
 				},
 				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Notebook 1')]",
-			"type": "Microsoft.Synapse/workspaces/notebooks",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"nbformat": 4,
-				"nbformat_minor": 2,
-				"bigDataPool": {
-					"referenceName": "sparkpool",
-					"type": "BigDataPoolReference"
-				},
-				"sessionProperties": {
-					"driverMemory": "28g",
-					"driverCores": 4,
-					"executorMemory": "28g",
-					"executorCores": 4,
-					"numExecutors": 2,
-					"conf": {
-						"spark.dynamicAllocation.enabled": "false",
-						"spark.dynamicAllocation.minExecutors": "2",
-						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "bc334494-b6ce-46e7-a87a-65f9337f1efc"
-					}
-				},
-				"metadata": {
-					"saveOutput": true,
-					"enableDebugMode": false,
-					"kernelspec": {
-						"name": "synapse_pyspark",
-						"display_name": "Synapse PySpark"
-					},
-					"language_info": {
-						"name": "python"
-					},
-					"a365ComputeOptions": {
-						"id": "/subscriptions/252558c6-6a92-406f-8c85-7c8ef7350693/resourceGroups/e-commerce_analytics/providers/Microsoft.Synapse/workspaces/ecom-synapse/bigDataPools/sparkpool",
-						"name": "sparkpool",
-						"type": "Spark",
-						"endpoint": "https://ecom-synapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool",
-						"auth": {
-							"type": "AAD",
-							"authResource": "https://dev.azuresynapse.net"
-						},
-						"sparkVersion": "3.5",
-						"nodeCount": 3,
-						"cores": 4,
-						"memory": 28
-					},
-					"sessionKeepAliveTimeout": 30
-				},
-				"cells": [
-					{
-						"cell_type": "code",
-						"metadata": {
-							"collapsed": false
-						},
-						"source": [
-							"# from pyspark.sql.functions import *\n",
-							"# from pyspark.sql.types import *\n",
-							"\n",
-							"# source_container = \"retail-data\"\n",
-							"# entities = [\"customers\",\"sales\",\"sales_orders\"]\n",
-							"# target_conatiner = [\"bronze\"]\n",
-							"\n",
-							"\n",
-							"# for entity in entities:\n",
-							"#     print(f\"Processing: {entity}...\")\n",
-							"\n",
-							"\n",
-							"\n",
-							"# df = spark.read.format(\"csv\") \\\n",
-							"#     .option(\"header\",\"true\") \\\n",
-							"#     .option(\"inferSchema\",\"true\") \\\n",
-							"#     .load(f\"abfss://{source_container}@ecomdevstorage.dfs.core.windows.net/{entity}/*\")\n",
-							"\n",
-							"\n",
-							"# bronze_df = df \\\n",
-							"#     .withColumn(\"file_path\",input_file_name()) \\\n",
-							"#     .withColumn(\"last_uodated_ts\",current_timestamp()) \n",
-							"# display(bronze_df)\n",
-							"\n",
-							"\n",
-							"# bronze_df.write.format(\"delta\") \\\n",
-							"#     .mode(\"overwrite\") \\ \n",
-							"#     .save(f\"abfss://bronze@ecomedevstorage.dfs.core.windows.net/{entity}/*\")\n",
-							"\n",
-							"# display(customers_df)"
-						],
-						"outputs": [],
-						"execution_count": 5
-					},
-					{
-						"cell_type": "code",
-						"source": [
-							"from pyspark.sql.functions import *\n",
-							"from pyspark.sql.types import *\n",
-							"\n",
-							"source_container = \"retail-data\"\n",
-							"entities = [\"customers\", \"sales\", \"sales_orders\"]\n",
-							"target_container = \"bronze\"\n",
-							"\n",
-							"for entity in entities:\n",
-							"\n",
-							"    print(f\"Data processing started for entity: {entity}\")\n",
-							"\n",
-							"    df = spark.read.format(\"csv\") \\\n",
-							"        .option(\"header\", \"true\") \\\n",
-							"        .option(\"inferSchema\", \"true\") \\\n",
-							"        .load(f\"abfss://{source_container}@ecomedevstorage.dfs.core.windows.net/{entity}/*\")\n",
-							"\n",
-							"    print(f\"Read completed for {entity} in {source_container} container.\")\n",
-							"\n",
-							"    bronze_df = df \\\n",
-							"        .withColumn(\"file_path\", input_file_name()) \\\n",
-							"        .withColumn(\"last_updated_ts\", current_timestamp())\n",
-							"\n",
-							"    print(f\"Metadata columns added successfully. Now writing {entity}.\")\n",
-							"\n",
-							"    bronze_df.write \\\n",
-							"        .format(\"delta\")\\\n",
-							"        .option(\"overwriteSchema\", \"true\")\\\n",
-							"        .mode(\"overwrite\")\\\n",
-							"        .save(f\"abfss://{target_container}@ecomedevstorage.dfs.core.windows.net/{entity}/\")\n",
-							"\n",
-							"    print(f\"Write completed for {entity} in {target_container} container.\")"
-						],
-						"outputs": [],
-						"execution_count": 8
-					},
-					{
-						"cell_type": "code",
-						"source": [
-							""
-						],
-						"outputs": [],
-						"execution_count": null
-					}
-				]
 			},
 			"dependsOn": []
 		},
@@ -685,7 +546,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "10447c04-0758-47c6-ba38-5329bd1354c7"
+						"spark.autotune.trackingId": "ddd89c0d-2e41-4b06-9b94-ffe3aad75b9c"
 					}
 				},
 				"metadata": {
@@ -730,7 +591,7 @@
 							"file_path = \"customers_final.csv\""
 						],
 						"outputs": [],
-						"execution_count": 7
+						"execution_count": 10
 					},
 					{
 						"cell_type": "code",
@@ -758,20 +619,10 @@
 							"    .withColumn(\"email\", lower(trim(col(\"email\"))))\n",
 							"    .withColumn(\"city\", initcap(trim(col(\"city\"))))\n",
 							"    .withColumn(\"customer_segment\", initcap(trim(col(\"customer_segment\"))))\n",
-							")\n",
-							"\n",
-							"# df_final = cleaned_df \\\n",
-							"#     .filter(col(\"customer_id\").isNotNull() & (col(\"customer_id\") != \"\")) \\\n",
-							"#     .withColumn(\"age\", when((col(\"age\") >= 18) & (col(\"age\") <= 100), col(\"age\")).otherwise(None)) \\\n",
-							"#     .withColumn(\"income\", when(col(\"income\") >= 0, col(\"income\")).otherwise(None)) \\\n",
-							"#     .withColumn(\"spending_score\", when((col(\"spending_score\") >= 0) & (col(\"spending_score\") <= 100), col(\"spending_score\")).otherwise(None))\n",
-							"\n",
-							"\n",
-							"display(cleaned_df.limit(10))\n",
-							""
+							")"
 						],
 						"outputs": [],
-						"execution_count": 2
+						"execution_count": 11
 					},
 					{
 						"cell_type": "code",
@@ -795,7 +646,7 @@
 							")"
 						],
 						"outputs": [],
-						"execution_count": 3
+						"execution_count": 12
 					},
 					{
 						"cell_type": "code",
@@ -818,19 +669,22 @@
 							"    .synapsesql(\"sqlpool.dbo.stg_customer_cleaned\")\n",
 							")\n",
 							"\n",
-							"print(\"Data successfully written to Dedicated SQL Pool!\")"
+							"print(\"Data successfully written to Dedicated SQL Pool!\")\n",
+							"\n",
+							"\n",
+							"mssparkutils.notebook.exit(\"SUCCESS\")"
 						],
 						"outputs": [],
-						"execution_count": 4
+						"execution_count": 15
 					},
 					{
 						"cell_type": "code",
 						"metadata": {},
 						"source": [
-							"cleaned_df.printSchema()"
+							"    "
 						],
 						"outputs": [],
-						"execution_count": 5
+						"execution_count": 14
 					},
 					{
 						"cell_type": "code",
