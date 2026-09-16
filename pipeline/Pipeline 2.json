@@ -218,9 +218,9 @@
 					}
 				],
 				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
+					"timeout": "0.00:30:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 58,
 					"secureOutput": false,
 					"secureInput": false
 				},
@@ -234,7 +234,15 @@
 					"sparkPool": {
 						"referenceName": "sparkpool",
 						"type": "BigDataPoolReference"
-					}
+					},
+					"executorSize": "Small",
+					"conf": {
+						"spark.dynamicAllocation.enabled": false,
+						"spark.dynamicAllocation.minExecutors": 1,
+						"spark.dynamicAllocation.maxExecutors": 1
+					},
+					"driverSize": "Small",
+					"numExecutors": 1
 				}
 			}
 		],
