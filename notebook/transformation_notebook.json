@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "ee853166-3797-419f-8b6e-6bb9d4e87887"
+				"spark.autotune.trackingId": "a20ef939-f71d-4d34-a042-54ac3458ae90"
 			}
 		},
 		"metadata": {
@@ -61,7 +61,7 @@
 					"container_name = \"staging\"\n",
 					"file_path = \"customers_final.csv\""
 				],
-				"execution_count": 7
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -89,19 +89,9 @@
 					"    .withColumn(\"email\", lower(trim(col(\"email\"))))\n",
 					"    .withColumn(\"city\", initcap(trim(col(\"city\"))))\n",
 					"    .withColumn(\"customer_segment\", initcap(trim(col(\"customer_segment\"))))\n",
-					")\n",
-					"\n",
-					"# df_final = cleaned_df \\\n",
-					"#     .filter(col(\"customer_id\").isNotNull() & (col(\"customer_id\") != \"\")) \\\n",
-					"#     .withColumn(\"age\", when((col(\"age\") >= 18) & (col(\"age\") <= 100), col(\"age\")).otherwise(None)) \\\n",
-					"#     .withColumn(\"income\", when(col(\"income\") >= 0, col(\"income\")).otherwise(None)) \\\n",
-					"#     .withColumn(\"spending_score\", when((col(\"spending_score\") >= 0) & (col(\"spending_score\") <= 100), col(\"spending_score\")).otherwise(None))\n",
-					"\n",
-					"\n",
-					"display(cleaned_df.limit(10))\n",
-					""
+					")"
 				],
-				"execution_count": 2
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -123,7 +113,7 @@
 					"    )\n",
 					")"
 				],
-				"execution_count": 3
+				"execution_count": 12
 			},
 			{
 				"cell_type": "code",
@@ -145,16 +135,19 @@
 					"    .synapsesql(\"sqlpool.dbo.stg_customer_cleaned\")\n",
 					")\n",
 					"\n",
-					"print(\"Data successfully written to Dedicated SQL Pool!\")"
+					"print(\"Data successfully written to Dedicated SQL Pool!\")\n",
+					"\n",
+					"\n",
+					"mssparkutils.notebook.exit(\"SUCCESS\")"
 				],
-				"execution_count": 4
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"cleaned_df.printSchema()"
+					"    "
 				],
-				"execution_count": 5
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
