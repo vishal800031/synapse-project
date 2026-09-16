@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "55be295d-7862-4e63-8e13-0fe27a7387f4"
+				"spark.autotune.trackingId": "ee853166-3797-419f-8b6e-6bb9d4e87887"
 			}
 		},
 		"metadata": {
@@ -51,9 +51,7 @@
 			{
 				"cell_type": "code",
 				"metadata": {
-					"tags": [
-						"parameters"
-					]
+					"tags": []
 				},
 				"source": [
 					"from pyspark.sql.functions import *\n",
@@ -61,10 +59,9 @@
 					"\n",
 					"storage_account = \"ecomedevstorage\"\n",
 					"container_name = \"staging\"\n",
-					"file_path = \"data_e9d6c2bf-02cf-4973-9d24-95fd63c1912b_08e8cd4f-f615-4e68-bbbd-396d9340d67b.txt\"\n",
-					""
+					"file_path = \"customers_final.csv\""
 				],
-				"execution_count": 1
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
