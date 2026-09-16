@@ -219,7 +219,7 @@
 				],
 				"policy": {
 					"timeout": "0.00:30:00",
-					"retry": 1,
+					"retry": 0,
 					"retryIntervalInSeconds": 58,
 					"secureOutput": false,
 					"secureInput": false
