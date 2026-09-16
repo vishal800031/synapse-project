@@ -253,7 +253,7 @@
 						],
 						"policy": {
 							"timeout": "0.00:30:00",
-							"retry": 1,
+							"retry": 0,
 							"retryIntervalInSeconds": 58,
 							"secureOutput": false,
 							"secureInput": false
@@ -546,7 +546,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "ddd89c0d-2e41-4b06-9b94-ffe3aad75b9c"
+						"spark.autotune.trackingId": "d9410fdb-de9f-4b1d-b817-f3ec19d395bd"
 					}
 				},
 				"metadata": {
