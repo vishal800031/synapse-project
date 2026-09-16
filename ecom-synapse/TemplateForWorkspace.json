@@ -1,0 +1,886 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "ecom-synapse"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"ecom-synapse-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ecom-synapse-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:ecom-synapse.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://ecomedevstorage.dfs.core.windows.net/"
+		},
+		"ecom-synapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://vishalaccount.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/Pipeline 2')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "json2csv",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "FlattenHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "$['customer_id']"
+										},
+										"sink": {
+											"name": "customer_id",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['first_name']"
+										},
+										"sink": {
+											"name": "first_name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['last_name']"
+										},
+										"sink": {
+											"name": "last_name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['email']"
+										},
+										"sink": {
+											"name": "email",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['phone']"
+										},
+										"sink": {
+											"name": "phone",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['age']"
+										},
+										"sink": {
+											"name": "age",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['gender']"
+										},
+										"sink": {
+											"name": "gender",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['city']"
+										},
+										"sink": {
+											"name": "city",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['state']"
+										},
+										"sink": {
+											"name": "state",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['country']"
+										},
+										"sink": {
+											"name": "country",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['signup_date']"
+										},
+										"sink": {
+											"name": "signup_date",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['customer_segment']"
+										},
+										"sink": {
+											"name": "customer_segment",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['annual_income']"
+										},
+										"sink": {
+											"name": "annual_income",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['total_spend']"
+										},
+										"sink": {
+											"name": "total_spend",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['total_orders']"
+										},
+										"sink": {
+											"name": "total_orders",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['is_active']"
+										},
+										"sink": {
+											"name": "is_active",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_adls_json_raw",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderPath": "staging",
+									"fileName": "customers_final.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "Notebook1",
+						"type": "SynapseNotebook",
+						"dependsOn": [
+							{
+								"activity": "json2csv",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "transformation_notebook",
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": "sparkpool",
+								"type": "BigDataPoolReference"
+							},
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"numExecutors": null
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ds_adls_json_raw')]",
+				"[concat(variables('workspaceId'), '/datasets/DelimitedText1')]",
+				"[concat(variables('workspaceId'), '/notebooks/transformation_notebook')]",
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DelimitedText1')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderPath": {
+						"type": "string"
+					},
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().folderPath",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_adls_json_raw')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "retail_customers_anomalous_100k.json",
+						"fileSystem": "raw"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"customer_id": {
+							"type": "string"
+						},
+						"first_name": {
+							"type": "string"
+						},
+						"last_name": {
+							"type": "string"
+						},
+						"email": {
+							"type": "string"
+						},
+						"phone": {
+							"type": "string"
+						},
+						"age": {
+							"type": "integer"
+						},
+						"gender": {
+							"type": "string"
+						},
+						"city": {
+							"type": "string"
+						},
+						"state": {
+							"type": "string"
+						},
+						"country": {
+							"type": "string"
+						},
+						"signup_date": {
+							"type": "string"
+						},
+						"customer_segment": {
+							"type": "string"
+						},
+						"annual_income": {
+							"type": "number"
+						},
+						"total_spend": {
+							"type": "number"
+						},
+						"total_orders": {
+							"type": "integer"
+						},
+						"is_active": {
+							"type": "boolean"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureDataLakeStorage1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ecom-synapse-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('ecom-synapse-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ecom-synapse-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ecom-synapse-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE TABLE dbo.stg_customer_cleaned\n(\n    customer_id VARCHAR(50),\n    first_name VARCHAR(100),\n    last_name VARCHAR(100),\n    email VARCHAR(255),\n    phone VARCHAR(30),\n    age INT,\n    gender VARCHAR(20),\n    city VARCHAR(100),\n    state VARCHAR(100),\n    country VARCHAR(100),\n    signup_date DATE,\n    customer_segment VARCHAR(50),\n    annual_income DECIMAL(18,2),\n    total_spend DECIMAL(18,2),\n    total_orders INT,\n    is_active BIT\n);\n\n\n\n\nSELECT TOP 10 *\nFROM dbo.stg_customer_cleaned;\n\n\n\nSELECT\n    customer_id,\n    first_name,\n    last_name,\n    email,\n    age,\n    annual_income,\n    total_spend,\n    total_orders,\n    is_active\nFROM dbo.stg_customer_cleaned\nWHERE age IS NULL\n   OR annual_income IS NULL\n   OR total_spend IS NULL\n   OR total_orders IS NULL\n   OR is_active IS NULL;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sqlpool",
+						"poolName": "sqlpool"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Notebook 1')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "sparkpool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "bc334494-b6ce-46e7-a87a-65f9337f1efc"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/252558c6-6a92-406f-8c85-7c8ef7350693/resourceGroups/e-commerce_analytics/providers/Microsoft.Synapse/workspaces/ecom-synapse/bigDataPools/sparkpool",
+						"name": "sparkpool",
+						"type": "Spark",
+						"endpoint": "https://ecom-synapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.5",
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"collapsed": false
+						},
+						"source": [
+							"# from pyspark.sql.functions import *\n",
+							"# from pyspark.sql.types import *\n",
+							"\n",
+							"# source_container = \"retail-data\"\n",
+							"# entities = [\"customers\",\"sales\",\"sales_orders\"]\n",
+							"# target_conatiner = [\"bronze\"]\n",
+							"\n",
+							"\n",
+							"# for entity in entities:\n",
+							"#     print(f\"Processing: {entity}...\")\n",
+							"\n",
+							"\n",
+							"\n",
+							"# df = spark.read.format(\"csv\") \\\n",
+							"#     .option(\"header\",\"true\") \\\n",
+							"#     .option(\"inferSchema\",\"true\") \\\n",
+							"#     .load(f\"abfss://{source_container}@ecomdevstorage.dfs.core.windows.net/{entity}/*\")\n",
+							"\n",
+							"\n",
+							"# bronze_df = df \\\n",
+							"#     .withColumn(\"file_path\",input_file_name()) \\\n",
+							"#     .withColumn(\"last_uodated_ts\",current_timestamp()) \n",
+							"# display(bronze_df)\n",
+							"\n",
+							"\n",
+							"# bronze_df.write.format(\"delta\") \\\n",
+							"#     .mode(\"overwrite\") \\ \n",
+							"#     .save(f\"abfss://bronze@ecomedevstorage.dfs.core.windows.net/{entity}/*\")\n",
+							"\n",
+							"# display(customers_df)"
+						],
+						"outputs": [],
+						"execution_count": 5
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"from pyspark.sql.functions import *\n",
+							"from pyspark.sql.types import *\n",
+							"\n",
+							"source_container = \"retail-data\"\n",
+							"entities = [\"customers\", \"sales\", \"sales_orders\"]\n",
+							"target_container = \"bronze\"\n",
+							"\n",
+							"for entity in entities:\n",
+							"\n",
+							"    print(f\"Data processing started for entity: {entity}\")\n",
+							"\n",
+							"    df = spark.read.format(\"csv\") \\\n",
+							"        .option(\"header\", \"true\") \\\n",
+							"        .option(\"inferSchema\", \"true\") \\\n",
+							"        .load(f\"abfss://{source_container}@ecomedevstorage.dfs.core.windows.net/{entity}/*\")\n",
+							"\n",
+							"    print(f\"Read completed for {entity} in {source_container} container.\")\n",
+							"\n",
+							"    bronze_df = df \\\n",
+							"        .withColumn(\"file_path\", input_file_name()) \\\n",
+							"        .withColumn(\"last_updated_ts\", current_timestamp())\n",
+							"\n",
+							"    print(f\"Metadata columns added successfully. Now writing {entity}.\")\n",
+							"\n",
+							"    bronze_df.write \\\n",
+							"        .format(\"delta\")\\\n",
+							"        .option(\"overwriteSchema\", \"true\")\\\n",
+							"        .mode(\"overwrite\")\\\n",
+							"        .save(f\"abfss://{target_container}@ecomedevstorage.dfs.core.windows.net/{entity}/\")\n",
+							"\n",
+							"    print(f\"Write completed for {entity} in {target_container} container.\")"
+						],
+						"outputs": [],
+						"execution_count": 8
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							""
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/transformation_notebook')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "sparkpool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "10447c04-0758-47c6-ba38-5329bd1354c7"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/252558c6-6a92-406f-8c85-7c8ef7350693/resourceGroups/e-commerce_analytics/providers/Microsoft.Synapse/workspaces/ecom-synapse/bigDataPools/sparkpool",
+						"name": "sparkpool",
+						"type": "Spark",
+						"endpoint": "https://ecom-synapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.5",
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"tags": []
+						},
+						"source": [
+							"from pyspark.sql.functions import *\n",
+							"from pyspark.sql.types import *\n",
+							"\n",
+							"storage_account = \"ecomedevstorage\"\n",
+							"container_name = \"staging\"\n",
+							"file_path = \"customers_final.csv\""
+						],
+						"outputs": [],
+						"execution_count": 7
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"collapsed": false
+						},
+						"source": [
+							"from pyspark.sql.functions import col, trim, initcap, lower, when, to_date\n",
+							"adls_path = f\"abfss://{container_name}@{storage_account}.dfs.core.windows.net/{file_path}\"\n",
+							"\n",
+							"# Reading the dataset\n",
+							"df = spark.read.load(\n",
+							"    adls_path,\n",
+							"    format=\"csv\",\n",
+							"    header=True,\n",
+							"    inferSchema=True\n",
+							")\n",
+							"df = df.dropDuplicates()\n",
+							"\n",
+							"cleaned_df = (\n",
+							"    df\n",
+							"    .withColumn(\"customer_id\", trim(col(\"customer_id\")))\n",
+							"    .withColumn(\"first_name\", initcap(trim(col(\"first_name\"))))\n",
+							"    .withColumn(\"last_name\", initcap(trim(col(\"last_name\"))))\n",
+							"    .withColumn(\"email\", lower(trim(col(\"email\"))))\n",
+							"    .withColumn(\"city\", initcap(trim(col(\"city\"))))\n",
+							"    .withColumn(\"customer_segment\", initcap(trim(col(\"customer_segment\"))))\n",
+							")\n",
+							"\n",
+							"# df_final = cleaned_df \\\n",
+							"#     .filter(col(\"customer_id\").isNotNull() & (col(\"customer_id\") != \"\")) \\\n",
+							"#     .withColumn(\"age\", when((col(\"age\") >= 18) & (col(\"age\") <= 100), col(\"age\")).otherwise(None)) \\\n",
+							"#     .withColumn(\"income\", when(col(\"income\") >= 0, col(\"income\")).otherwise(None)) \\\n",
+							"#     .withColumn(\"spending_score\", when((col(\"spending_score\") >= 0) & (col(\"spending_score\") <= 100), col(\"spending_score\")).otherwise(None))\n",
+							"\n",
+							"\n",
+							"display(cleaned_df.limit(10))\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"from pyspark.sql.functions import col, trim, lower, to_timestamp, when\n",
+							"\n",
+							"cleaned_df = (\n",
+							"    cleaned_df\n",
+							"    .withColumn(\"age\", col(\"age\").cast(\"int\"))\n",
+							"    .withColumn(\"signup_date\", to_timestamp(col(\"signup_date\")))\n",
+							"    .withColumn(\"annual_income\", col(\"annual_income\").cast(\"decimal(18,2)\"))\n",
+							"    .withColumn(\"total_spend\", col(\"total_spend\").cast(\"decimal(18,2)\"))\n",
+							"    .withColumn(\"total_orders\", col(\"total_orders\").cast(\"int\"))\n",
+							"    .withColumn(\n",
+							"        \"is_active\",\n",
+							"        when(lower(trim(col(\"is_active\"))) == \"true\", True)\n",
+							"        .when(lower(trim(col(\"is_active\"))) == \"false\", False)\n",
+							"        .otherwise(None)\n",
+							"    )\n",
+							")"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"from com.microsoft.spark.sqlanalytics.Constants import Constants\n",
+							"\n",
+							"sql_server = \"ecom-synapse.sql.azuresynapse.net\"\n",
+							"\n",
+							"temp_folder = (\n",
+							"    f\"abfss://{container_name}@{storage_account}.dfs.core.windows.net/\"\n",
+							"    \"staging/sql_temp\"\n",
+							")\n",
+							"\n",
+							"(\n",
+							"    cleaned_df.write\n",
+							"    .option(Constants.SERVER, sql_server)\n",
+							"    .option(Constants.TEMP_FOLDER, temp_folder)\n",
+							"    .mode(\"overwrite\")\n",
+							"    .synapsesql(\"sqlpool.dbo.stg_customer_cleaned\")\n",
+							")\n",
+							"\n",
+							"print(\"Data successfully written to Dedicated SQL Pool!\")"
+						],
+						"outputs": [],
+						"execution_count": 4
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"cleaned_df.printSchema()"
+						],
+						"outputs": [],
+						"execution_count": 5
+					},
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							""
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sparkpool')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 10,
+					"minNodeCount": 3
+				},
+				"nodeCount": 0,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.5",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": true,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "australiaeast"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sqlpool')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "australiaeast"
+		}
+	]
+}
