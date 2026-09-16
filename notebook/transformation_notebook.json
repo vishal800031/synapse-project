@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "3bbf27ea-9310-4c7e-9444-4fc01eae1e72"
+				"spark.autotune.trackingId": "3c2b0642-37f5-4c49-b0df-4097d0356440"
 			}
 		},
 		"metadata": {
@@ -61,7 +61,7 @@
 					"container_name = \"staging\"\n",
 					"file_path = \"customers_final.csv\""
 				],
-				"execution_count": 10
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
@@ -91,7 +91,7 @@
 					"    .withColumn(\"customer_segment\", initcap(trim(col(\"customer_segment\"))))\n",
 					")"
 				],
-				"execution_count": 11
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -113,7 +113,7 @@
 					"    )\n",
 					")"
 				],
-				"execution_count": 12
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
@@ -137,10 +137,9 @@
 					"\n",
 					"print(\"Data successfully written to Dedicated SQL Pool!\")\n",
 					"\n",
-					"\n",
-					"mssparkutils.notebook.exit(\"SUCCESS\")"
+					"mssparkutils.session.stop()"
 				],
-				"execution_count": 15
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",

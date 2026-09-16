@@ -244,6 +244,33 @@
 					"driverSize": "Small",
 					"numExecutors": 1
 				}
+			},
+			{
+				"name": "Load Customer Final",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Notebook1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "dbo.usp_load_customer_final"
+				},
+				"linkedServiceName": {
+					"referenceName": "ecom-synapse-WorkspaceDefaultSqlServer",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"annotations": []
